@@ -130,6 +130,9 @@ dmypy.json
 
 # Log
 log/
+**/log_*.txt
+**/err_*.txt
+nohup.out
 
 # plotting images
 img/
