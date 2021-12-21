@@ -124,12 +124,16 @@ def get_payoff_flow(n, v, budget=None, epsilon=1e-12):
         i = exceed_idxs[0]
         reduction = income[i] + budget[i]  # negative
 
+
         # this reduction only affects conditional shapley given i
         # every coalition in the permutations given i
         # is reduced by a fraction reduction / outgoing_payoff[i]
         # due to linearity property of conditional Shapley value
         # update payoff_flow
         payoff_flow[i, :] = payoff_flow[i, :] * (1 + reduction / outgoing_payoff[i])
+
+        print("allocation.py:get_payoff_flow Reduction: ", reduction)
+        print("  party {} weight: {}".format(i, (1 + reduction / outgoing_payoff[i])))
         outgoing_payoff = np.sum(payoff_flow, axis=1)  # outgoing payoff
         incoming_payoff = np.sum(payoff_flow, axis=0)  # incoming payoff
         income = incoming_payoff - outgoing_payoff
