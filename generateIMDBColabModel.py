@@ -9,6 +9,7 @@ import re
 import shutil
 import string
 import tensorflow as tf
+import numpy as np
 import pickle
 
 from tensorflow.keras import layers
@@ -151,6 +152,8 @@ AUTOTUNE = tf.data.AUTOTUNE
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 test_ds = test_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
+test_accs = np.zeros(1 << n_parties)
+
 for bitmask in range(1, 1 << n_parties):
     print("\n##Train for coalition", bin(bitmask))
 
@@ -184,16 +187,17 @@ for bitmask in range(1, 1 << n_parties):
         epochs=epochs)
 
     loss, accuracy = model.evaluate(test_ds)
-
+    test_accs[bitmask] = accuracy
+    
     print("\tLoss: ", loss)
     print("\tAccuracy: ", accuracy)
 
-    with open("imdb_sentiment_analysis/{}.pkl".format(name), "wb") as outfile:
-        pickle.dump({
-            "party_labels": [str(i) for i in range(n_parties)],
-            "name": name,
-            "test_acc": accuracy,
-            "replicated_party_idxs": []
-        },
-        outfile,
-        protocol=pickle.HIGHEST_PROTOCOL)
+with open("imdb_sentiment_analysis/{}.pkl".format(name), "wb") as outfile:
+    pickle.dump({
+        "party_labels": [str(i) for i in range(n_parties)],
+        "name": name,
+        "test_acc": test_accs,
+        "replicated_party_idxs": []
+    },
+    outfile,
+    protocol=pickle.HIGHEST_PROTOCOL)

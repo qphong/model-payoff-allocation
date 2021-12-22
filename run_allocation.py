@@ -27,6 +27,9 @@ def run_allocation(info_path, budget, budget_id,ylim=None):
 
     payoff, income, model_reward = allocation.get_payoff_flow(n_party, value_func, budget)
 
+    print("Payoff")
+    print(payoff)
+
     # TODO: implement the case of replicated parties
 
     self_values = np.zeros(n_party)
@@ -40,9 +43,9 @@ def run_allocation(info_path, budget, budget_id,ylim=None):
     utils.visualize_model_reward(payoff, self_values, party_labels, path_prefix)
 
 if __name__ == "__main__":
-    experiment_name = "mnist_v_5_parties_no_replication"
+    # experiment_name = "mnist_v_5_parties_no_replication"
 
-    info_path = "mnist_training/{}".format(experiment_name)
+    # info_path = "mnist_training/{}".format(experiment_name)
 
     # otherwise, budget is a vector of size n_party: party[i] is the maximum expense for party i
     # budget_id = "unlimited"
@@ -52,32 +55,50 @@ if __name__ == "__main__":
     # budget_id = "first_two_0_5"
     # budget_id = "first_two_0_25"
     # budget_id = "first_two_unlimited"
-    budget_id = "last_unlimited"
+    # budget_id = "last_unlimited"
+
+    # if budget_id == "unlimited":
+    #     budget = None 
+    # elif budget_id == "uniform_zero":
+    #     budget = np.zeros(5)
+    # elif budget_id == "first_0_5":
+    #     budget = np.zeros(5)
+    #     budget[0] = 0.5
+    # elif budget_id == "first_unlimited":
+    #     budget = np.zeros(5)
+    #     budget[0] = 1e9
+    # elif budget_id == "last_unlimited":
+    #     budget = np.zeros(5)
+    #     budget[-1] = 1e9
+    # elif budget_id == "first_two_0_5":
+    #     budget = np.zeros(5)
+    #     budget[0] = budget[1] = 0.5
+    # elif budget_id == "first_two_0_25":
+    #     budget = np.zeros(5)
+    #     budget[0] = budget[1] = 0.25
+    # elif budget_id == "first_two_unlimited":
+    #     budget = np.zeros(5)
+    #     budget[0] = budget[1] = 1e9
+
+    # ylim = (-1.6, 2)
+
+    experiment_name = "imdb_5_parties"
+
+    info_path = "imdb_sentiment_analysis/{}".format(experiment_name)
+
+    # budget_id = "unlimited"
+    # budget_id = "uniform_zero"
+    budget_id = "unlimited_2"
 
     if budget_id == "unlimited":
-        budget = None 
+        budget = None
     elif budget_id == "uniform_zero":
         budget = np.zeros(5)
-    elif budget_id == "first_0_5":
+    elif budget_id == "unlimited_2":
         budget = np.zeros(5)
-        budget[0] = 0.5
-    elif budget_id == "first_unlimited":
-        budget = np.zeros(5)
-        budget[0] = 1e9
-    elif budget_id == "last_unlimited":
-        budget = np.zeros(5)
-        budget[-1] = 1e9
-    elif budget_id == "first_two_0_5":
-        budget = np.zeros(5)
-        budget[0] = budget[1] = 0.5
-    elif budget_id == "first_two_0_25":
-        budget = np.zeros(5)
-        budget[0] = budget[1] = 0.25
-    elif budget_id == "first_two_unlimited":
-        budget = np.zeros(5)
-        budget[0] = budget[1] = 1e9
+        budget[2] = 100. 
 
-    ylim = (-1.6, 2)
+    ylim = None
 
     run_allocation(info_path, budget, budget_id, ylim)
     
