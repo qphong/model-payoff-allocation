@@ -134,6 +134,8 @@ log/
 **/err_*.txt
 nohup.out
 
+.python_history
+
 # plotting images
 img/
 
