@@ -136,3 +136,7 @@ nohup.out
 
 # plotting images
 img/
+
+# IMDB dataset
+aclImdb/
+aclImdb_v1.tar.gz

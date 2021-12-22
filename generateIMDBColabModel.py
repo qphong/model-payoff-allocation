@@ -16,18 +16,18 @@ from tensorflow.keras import losses
 
 
 # Download the IMDB dataset
-url = "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"
+# url = "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"
 
-dataset = tf.keras.utils.get_file("aclImdb_v1", url,
-                                    untar=True, cache_dir='.',
-                                    cache_subdir='')
+# dataset = tf.keras.utils.get_file("aclImdb_v1", url,
+#                                     untar=True, cache_dir='.',
+#                                     cache_subdir='')
 
-dataset_dir = os.path.join(os.path.dirname(dataset), 'aclImdb')
+# dataset_dir = os.path.join(os.path.dirname(dataset), 'aclImdb')
 
-# only use aclImdb/train/pos and aclImdb/train/neg
-train_dir = os.path.join(dataset_dir, 'train')
-remove_dir = os.path.join(train_dir, 'unsup')
-shutil.rmtree(remove_dir)
+# # only use aclImdb/train/pos and aclImdb/train/neg
+# train_dir = os.path.join(dataset_dir, 'train')
+# remove_dir = os.path.join(train_dir, 'unsup')
+# shutil.rmtree(remove_dir)
 
 batch_size = 32
 seed = 0
@@ -119,17 +119,30 @@ There are 5 different parties with dataset:
    1k ----> 8k
             8k ----> 12k
                      12k --------> 20k
-                          16k ---> 20k
 """
 name = "imdb_5_parties"
 n_parties = 5
-datasets = [] # list of datasets, each for 1 party
+datasets = [None] * n_parties # list of datasets, each for 1 party
 
-datasets[0] = train_ds.take(7000)
-datasets[1] = train_ds.skip(1000).take(7000)
-datasets[2] = train_ds.skip(8001).take(4000)
-datasets[3] = train_ds.skip(12001)
-datasets[4] = train_ds.skip(16000)
+# given batch_size = 32
+# there are 625 batches
+if name == "imdb_4_parties":
+    datasets[0] = train_ds.take(218)
+    datasets[1] = train_ds.skip(31).take(218)
+    datasets[2] = train_ds.skip(218+31).take(125)
+    datasets[3] = train_ds.skip(343)
+elif name == "imdb_4_parties_1all":
+    datasets[0] = train_ds.skip(0)
+    datasets[1] = train_ds.take(218)
+    datasets[2] = train_ds.skip(218).take(125)
+    datasets[3] = train_ds.skip(218+125)
+elif name == "imdb_5_parties":
+    ndata = int(625/5)
+    datasets[0] = train_ds.take(ndata)
+    datasets[1] = train_ds.skip(ndata).take(ndata)
+    datasets[2] = train_ds.skip(ndata*2).take(ndata)
+    datasets[3] = train_ds.skip(ndata*3).take(ndata)
+    datasets[4] = train_ds.skip(ndata*4).take(ndata)
 
 # Configure the dataset for performance
 AUTOTUNE = tf.data.AUTOTUNE
@@ -149,10 +162,12 @@ for bitmask in range(1, 1 << n_parties):
             cur_ds = datasets[i] if first else cur_ds.concatenate(datasets[i])
             first = False
 
+    # cur_ds = cur_ds.shuffle(buffer_size=1000, seed=0, reshuffle_each_iteration=False).batch(32)
+
     cur_ds = cur_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
     # init_weights = model.get_weights()
-    # 
+    
     # with open("imdb_sentiment_analysis/imdb_init_weights.pkl", "wb") as outfile:
     #     pickle.dump(init_weights, outfile, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -164,7 +179,7 @@ for bitmask in range(1, 1 << n_parties):
 
     epochs = 10
     history = model.fit(
-        train_ds,
+        cur_ds,
         validation_data=val_ds,
         epochs=epochs)
 
