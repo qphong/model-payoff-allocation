@@ -135,6 +135,8 @@ log/
 nohup.out
 
 .python_history
+.bash_history
+.keras/
 
 # plotting images
 img/
